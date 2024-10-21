@@ -10,6 +10,7 @@ for the raw Pluto notebooks.
 ## Content
 
 - [Introductory presentation](dftk_multidisciplinary.pdf)
+- [Hello world of plane-wave DFT](0_hello_wordl.html)
 - [Custom SCF algorithms](1_custom_scf.html)
 - [JuliaMolSim integration](2_juliamolsim_integration.html)
 - [Gross-Pitaevskii equation](3_gpe.html)

@@ -23,12 +23,18 @@ begin
 	using Plots
 	using KrylovKit
 	using Statistics
+	using LinearAlgebra
+	using Unitful
+	using UnitfulAtomic
 end
 
 # ╔═╡ f2f201cf-0256-4363-b3c1-17104054e594
 md"""
 # Dielectric eigenpairs
 """
+
+# ╔═╡ b0bb59d7-cb8d-4a8f-88c1-88e8fe70d791
+setup_threading(n_blas=1)
 
 # ╔═╡ 5d127331-8884-45b3-ae28-80ce3d5531f5
 # Dump the Artifacts.toml file, which tells Julia where to get the pseudopotentials from
@@ -44,6 +50,11 @@ lazy = true
 	"""
 	write("Artifacts.toml", content)
 end;
+
+# ╔═╡ a4cf819c-8568-49fc-bf0a-3ae209aa56be
+md"""Select kinetic energy cutoff `Ecut`:
+- `Ecut = ` $(@bind Ecut PlutoUI.Select([7, 15, 25]; default=7))
+"""
 
 # ╔═╡ fae0a2bd-6e12-4fa7-8805-0948c81efe57
 md"""
@@ -69,7 +80,7 @@ end
 # ╔═╡ 13446c99-ae13-47ee-9c29-f6acd2a9fff4
 begin
 	model_Al = model_PBE(system_Al; temperature=1e-3, symmetries=false)
-	basis_Al = PlaneWaveBasis(model_Al; Ecut=7, kgrid=(1, 1, 1))
+	basis_Al = PlaneWaveBasis(model_Al; Ecut, kgrid=(1, 2, 2))
 end;
 
 # ╔═╡ 387b07a5-bd5d-4b45-a495-b26477e8f704
@@ -86,17 +97,58 @@ using three different preconditioners, namely
 # ╔═╡ ecacc9c7-3b11-46ba-aebd-c57887074651
 begin
 	p = plot(yaxis=:log, title="Aluminium with $n_repeat_aluminium layers")
-	scfres_Al = nothing
 	for mixtype in [SimpleMixing, KerkerMixing, LdosMixing]
 		scfres_Al = self_consistent_field(basis_Al;
 		                                  damping=1.0,        # Use no damping
 		                                  callback=identity,  # Disable output
 	                                      mixing=mixtype(),
 	                                      tol=1e-8,
-		                                  maxiter=30)
+		                                  maxiter=20)
 		plot!(p, scfres_Al.history_Δρ, label=string(mixtype), lw=2, mark=:x)
 	end
 	p
+end
+
+# ╔═╡ 0574ad92-2554-4469-9776-4a42caad7256
+md"""
+## Modelling helium
+"""
+
+# ╔═╡ 1fff9a65-fc63-445c-a41d-17df98d56d3c
+md"""
+- `n_repeat_helium` = $(@bind n_repeat_helium Slider(25:5:40; show_value=true, default=25))
+"""
+
+# ╔═╡ eee2759b-5055-4143-820e-0f14b3d01cae
+begin
+	bounding_box = 2.6 * [[1, 0, 0],
+					      [0, 1, 0],
+					      [0, 0, 1]]u"Å"
+	he_single = periodic_system([:He => zeros(3)u"Å", ], bounding_box)
+
+	system_He = attach_psp(he_single * (n_repeat_helium, 1, 1);
+	                       He=artifact"pd_nc_sr_pbe_standard_0.4.1_upf/He.upf")
+end
+
+# ╔═╡ bead2d43-47ad-48ff-949e-1521dd997e22
+begin
+	model_He = model_PBE(system_He; temperature=1e-3, symmetries=false)
+	basis_He = PlaneWaveBasis(model_He; Ecut, kgrid=(1, 2, 2))
+end;
+
+# ╔═╡ 00d596b2-7060-4578-bc1a-9841e0c68277
+begin
+	q = plot(yaxis=:log, title="Helium with $n_repeat_helium layers")
+	for mixtype in [SimpleMixing, KerkerMixing, LdosMixing]
+		scfres_He = self_consistent_field(basis_He;
+		                                  damping=1.0,        # Use no damping
+		                                  callback=identity,  # Disable output
+	                                      mixing=mixtype(),
+	                                      tol=1e-8,
+		                                  maxiter=20)
+		plot!(q, scfres_He.history_Δρ, label=string(mixtype), lw=2, mark=:x)
+	end
+	q
 end
 
 # ╔═╡ e58421d4-8f8d-11ef-18ff-d316ae57fa3a
@@ -190,9 +242,12 @@ AtomsBuilder = "f5cc8831-eeb7-4288-8d9f-d6c1ddb77004"
 DFTK = "acf6eb54-70d9-11e9-0013-234b7a5f5337"
 KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
 LazyArtifacts = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
 AtomsBuilder = "~0.1.0"
@@ -201,6 +256,8 @@ KrylovKit = "~0.8.1"
 Plots = "~1.40.8"
 PlutoUI = "~0.7.60"
 Statistics = "~1.11.1"
+Unitful = "~1.21.0"
+UnitfulAtomic = "~1.0.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -209,7 +266,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "91f970966f5f64302f3baaedc15352cb3cc7b887"
+project_hash = "b90b476f6c2295c653f60e4c645c434aaab5d4a4"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -2123,13 +2180,20 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╟─f2f201cf-0256-4363-b3c1-17104054e594
 # ╠═7c37fa06-2c88-4794-baab-81c408a89e6a
+# ╠═b0bb59d7-cb8d-4a8f-88c1-88e8fe70d791
 # ╟─5d127331-8884-45b3-ae28-80ce3d5531f5
+# ╟─a4cf819c-8568-49fc-bf0a-3ae209aa56be
 # ╟─c50ed373-4462-462b-924a-a57b1665e348
 # ╟─fae0a2bd-6e12-4fa7-8805-0948c81efe57
 # ╠═7434967b-b988-447a-b346-cac2b4c11776
 # ╠═13446c99-ae13-47ee-9c29-f6acd2a9fff4
 # ╟─387b07a5-bd5d-4b45-a495-b26477e8f704
 # ╠═ecacc9c7-3b11-46ba-aebd-c57887074651
+# ╟─0574ad92-2554-4469-9776-4a42caad7256
+# ╟─1fff9a65-fc63-445c-a41d-17df98d56d3c
+# ╠═eee2759b-5055-4143-820e-0f14b3d01cae
+# ╠═bead2d43-47ad-48ff-949e-1521dd997e22
+# ╠═00d596b2-7060-4578-bc1a-9841e0c68277
 # ╟─e58421d4-8f8d-11ef-18ff-d316ae57fa3a
 # ╠═0c146256-a19d-43c7-a874-63c810ab2f08
 # ╠═a78e34b8-0ab9-4400-a437-ccb9648535d3

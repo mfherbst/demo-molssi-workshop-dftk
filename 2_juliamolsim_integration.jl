@@ -24,7 +24,7 @@ md"""
 """
 
 # ╔═╡ 28bafe4d-8414-4ae8-a0e5-8f536f518404
-setup_threading()
+setup_threading(n_blas=1)
 
 # ╔═╡ 52f9a6d9-2ee3-4159-a198-a8184c84d276
 # Dump the Artifacts.toml file, which tells Julia where to get the pseudopotentials from
@@ -62,8 +62,8 @@ begin
 	model_kwargs = (; temperature=1e-3, smearing=Smearing.Gaussian(),
 	                  functionals=[:gga_c_pbe, :gga_x_pbe])
 	basis_kwargs = (; Ecut=7, kgrid=(2, 2, 2))
-	scf_kwargs   = (; tol=1e-6)
-	dftk = DFTKCalculator(; model_kwargs, basis_kwargs, scf_kwargs)
+	scf_kwargs   = (; tol=1e-6, mixing=KerkerMixing())
+	dftk = DFTKCalculator(; model_kwargs, basis_kwargs, scf_kwargs, verbose=true)
 end
 
 # ╔═╡ 7a1fd457-2cca-48fd-8455-ffe034a3bc50
@@ -76,7 +76,8 @@ AtomsCalculators.potential_energy(aluminium, dftk)
 md"## Geometry optimization"
 
 # ╔═╡ c55218e2-f4e8-4ebf-853a-f6e66f8662ef
-result_dft = minimize_energy!(aluminium, dftk, verbosity=1)
+result_dft = minimize_energy!(aluminium, dftk, GeometryOptimization.OptimLBFGS();
+                              verbosity=2)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
