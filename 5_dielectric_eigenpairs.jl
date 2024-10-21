@@ -56,6 +56,12 @@ md"""Select kinetic energy cutoff `Ecut`:
 - `Ecut = ` $(@bind Ecut PlutoUI.Select([7, 15, 25]; default=7))
 """
 
+# ╔═╡ 5f8776fb-bea2-4b30-a733-8899392e0aa2
+md"""
+!!! note "Expensive notebook"
+	Some computations in this notebook take extended time. To see the "real" effects. Try increasing the `n_repeat_aluminium` and `n_repeat_helium` and `Ecut` as high as you can afford. Running the simulations take minutes. This is normal.
+"""
+
 # ╔═╡ fae0a2bd-6e12-4fa7-8805-0948c81efe57
 md"""
 - `n_repeat_aluminium = ` $(@bind n_repeat_aluminium Slider(2:2:10; show_value=true, default=4))
@@ -2183,6 +2189,7 @@ version = "1.4.1+1"
 # ╠═b0bb59d7-cb8d-4a8f-88c1-88e8fe70d791
 # ╟─5d127331-8884-45b3-ae28-80ce3d5531f5
 # ╟─a4cf819c-8568-49fc-bf0a-3ae209aa56be
+# ╟─5f8776fb-bea2-4b30-a733-8899392e0aa2
 # ╟─c50ed373-4462-462b-924a-a57b1665e348
 # ╟─fae0a2bd-6e12-4fa7-8805-0948c81efe57
 # ╠═7434967b-b988-447a-b346-cac2b4c11776

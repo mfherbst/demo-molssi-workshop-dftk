@@ -8,6 +8,8 @@ using InteractiveUtils
 begin
 	using DFTK
 	using ForwardDiff
+	using Unitful
+	using UnitfulAtomic
 end
 
 # ╔═╡ fa05e7a6-8f8c-11ef-2617-adda8848fa7d
@@ -26,20 +28,23 @@ Assume we are interested in the question
 Or in other words we want the derivative $\frac{d E_g}{d a}$, so let's compute it:
 """
 
+# ╔═╡ 03840a8d-a434-41e0-9a72-0a3ea8aa6df8
+a = 10.26
+
 # ╔═╡ e1c38e7f-d6de-450f-a2e2-d62c91219309
-function silicon_band_gap(a=10.26)
+function silicon_band_gap(a)
 	lattice = a /2 *  [[0 1 1.];
                        [1 0 1.];
                        [1 1 0.]]
 	Si = ElementPsp(:Si, psp=load_psp("hgh/lda/Si-q4"))
-	atoms     = [Si, Si]
+	atoms = [Si, Si]
 	positions = [ones(3)/8, -ones(3)/8]
 
 	model  = model_LDA(lattice, atoms, positions)
 	basis  = PlaneWaveBasis(model; Ecut=15, kgrid=(4, 4, 4))
-	scfres = self_consistent_field(basis; tol=1e-4)
-
-	# Find direct band gap
+	scfres = self_consistent_field(basis;
+				tol=1e-5, response=ResponseOptions(; verbose=true))
+	
 	gaps = map(scfres.eigenvalues) do εk
 		εk_rel = εk .- scfres.εF
 		ε_cbm = minimum(εk_rel[εk_rel .≥ 0])
@@ -50,18 +55,22 @@ function silicon_band_gap(a=10.26)
 	minimum(gaps)
 end
 
-# ╔═╡ e2959f89-0e75-437c-8657-a292c20b98a7
-ForwardDiff.derivative(silicon_band_gap, 10.26)
+# ╔═╡ baddb423-667f-4222-8d1d-2392c8e1b9ff
+ForwardDiff.derivative(silicon_band_gap, a)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DFTK = "acf6eb54-70d9-11e9-0013-234b7a5f5337"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
 DFTK = "~0.6.20"
 ForwardDiff = "~0.10.36"
+Unitful = "~1.21.0"
+UnitfulAtomic = "~1.0.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -70,7 +79,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "b6e689fe89d4f3945389fb3588ffe06076b53b33"
+project_hash = "9ffc25bb1da1adabbdecbd0bccc58a0d41a75281"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1164,7 +1173,8 @@ version = "2.1.0+0"
 # ╟─fa05e7a6-8f8c-11ef-2617-adda8848fa7d
 # ╠═a0ca087b-1213-4ce4-a992-0243e8a5e5a8
 # ╟─96e30b24-d6d0-47e5-886e-5e9c378b2000
+# ╠═03840a8d-a434-41e0-9a72-0a3ea8aa6df8
 # ╠═e1c38e7f-d6de-450f-a2e2-d62c91219309
-# ╠═e2959f89-0e75-437c-8657-a292c20b98a7
+# ╠═baddb423-667f-4222-8d1d-2392c8e1b9ff
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

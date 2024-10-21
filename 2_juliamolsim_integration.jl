@@ -48,7 +48,7 @@ md"## Initial structure"
 begin
 	# Use AtomsBuilder to make initial structure
 	al_bare = bulk(:Al, cubic=true) * (1, 1, 1)
-	rattle!(al_bare, 1e-3)  # Perturb structure a little
+	rattle!(al_bare, 0.05)  # Perturb structure a little
 	aluminium = attach_psp(al_bare;
 	                       Al=artifact"pd_nc_sr_pbe_standard_0.4.1_upf/Al.upf")
 end
@@ -72,12 +72,20 @@ md"Compute the potential energy:"
 # ╔═╡ 63837262-5c4a-4cc7-b94f-ea646a53fd6b
 AtomsCalculators.potential_energy(aluminium, dftk)
 
+# ╔═╡ 8e19dda3-4bd8-4ae3-8bff-c74daaac32d1
+res = AtomsCalculators.calculate(AtomsCalculators.Energy(), aluminium, dftk)
+
+# ╔═╡ 4220cbfd-4e40-414c-840b-5889150d6310
+res2 = AtomsCalculators.calculate(AtomsCalculators.Forces(), aluminium, dftk, nothing, res.state)
+
+# ╔═╡ a3806bc2-fe41-4bd3-880e-4c8fb5094ca7
+res2.forces
+
 # ╔═╡ bed1564b-a84e-42f2-85d5-f7714446463e
 md"## Geometry optimization"
 
 # ╔═╡ c55218e2-f4e8-4ebf-853a-f6e66f8662ef
-result_dft = minimize_energy!(aluminium, dftk, GeometryOptimization.OptimLBFGS();
-                              verbosity=2)
+result_dft = minimize_energy!(aluminium, dftk, GeometryOptimization.OptimLBFGS(); verbosity=2)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2604,7 +2612,10 @@ version = "1.4.1+1"
 # ╠═da75ad79-3137-4939-a2a8-af9df7fab5c5
 # ╟─7a1fd457-2cca-48fd-8455-ffe034a3bc50
 # ╠═63837262-5c4a-4cc7-b94f-ea646a53fd6b
+# ╠═4220cbfd-4e40-414c-840b-5889150d6310
+# ╠═a3806bc2-fe41-4bd3-880e-4c8fb5094ca7
 # ╟─bed1564b-a84e-42f2-85d5-f7714446463e
 # ╠═c55218e2-f4e8-4ebf-853a-f6e66f8662ef
+# ╠═0839502e-3d89-4378-b3a2-e2f98591cc47
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
