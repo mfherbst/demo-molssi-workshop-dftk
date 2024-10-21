@@ -2,7 +2,8 @@
 
 This website hosts static renderings of the Pluto notebooks used for the presentation
 **DFTK: An introduction to a multi-disciplinary electronic structure code** given at
-the [MolSSI workshop on Julia for Computational Molecular and Materials Science](https://juliamolsim.org/molssi_workshop/).
+the [MolSSI workshop on Julia for Computational Molecular and Materials Science](https://juliamolsim.org/molssi_workshop/)
+on 21st October 2024.
 See [its associated github repository](https://github.com/mfherbst/demo-molssi-workshop-dftk)
 for the raw Pluto notebooks.
 
@@ -18,6 +19,7 @@ for the raw Pluto notebooks.
 
 ## Links and further resources
 
+- [5 years DFTK talk at JuliaCon 2024](https://www.youtube.com/watch?v=ox_j2zKOuIk)
 - [DFTK documentation](https://docs.dftk.org/), in particular interesting are:
   * [Introductory resources](https://docs.dftk.org/dev/guide/introductory_resources/)
   * [AtomsBase integration](https://docs.dftk.org/dev/ecosystem/atomsbase/)
